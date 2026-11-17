@@ -25,6 +25,62 @@ def versdec(s):
     n=n*2+int(c)
   return n
 
+def lire(t):
+  # "5,75" ou "-5.75" -> (signe, entier, chiffres apres la virgule)
+  t=t.replace(" ","").replace(",",".")
+  sg=1
+  if t[:1]=="-":
+    sg=-1
+    t=t[1:]
+  if "." in t:
+    a,f=t.split(".")
+  else:
+    a,f=t,""
+  if a=="":
+    a="0"
+  return sg,int(a),f
+
+def decbin(t):
+  sg,a,f=lire(t)
+  s=versbin(a)
+  if f!="" and int(f)>0:
+    num=int(f)
+    den=10**len(f)
+    s=s+"."
+    k=0
+    while num>0 and k<16:
+      num=num*2
+      s=s+str(num//den)
+      num=num%den
+      k=k+1
+    if num>0:
+      s=s+"..."
+  return ("-" if sg<0 else "")+s
+
+def bindec(t):
+  t=t.replace(" ","").replace(",",".")
+  sg=""
+  if t[:1]=="-":
+    sg="-"
+    t=t[1:]
+  if "." in t:
+    a,f=t.split(".")
+  else:
+    a,f=t,""
+  if a=="":
+    a="0"
+  e=versdec(a)
+  if e is None or (f!="" and versdec(f) is None):
+    return None
+  if f=="":
+    return sg+str(e)
+  m=len(f)
+  d=str(versdec(f)*5**m)
+  while len(d)<m:
+    d="0"+d
+  d=d.rstrip("0")
+  return sg+str(e)+("."+d if d else "")
+
 def tient(n,b):
   return -2**(b-1)<=n<2**(b-1)
 
@@ -53,8 +109,12 @@ while True:
   print("5:Quitter")
   ch=input("Choix ? ")
   if ch=="1":
-    n=int(input("Nombre ? "))
-    print("=",versbin(n))
+    t=input("Nombre ? ")
+    print("=",decbin(t))
+    sg,a,f=lire(t)
+    if f.strip("0")!="":
+      continue
+    n=sg*a
     b=BITS
     if b==0:
       b=8
@@ -66,7 +126,7 @@ while True:
     else:
       print("Trop grand pour",b,"bits")
   elif ch=="2":
-    r=versdec(input("Binaire ? "))
+    r=bindec(input("Binaire ? "))
     if r is None:
       print("Que des 0 et des 1 !")
     else:
